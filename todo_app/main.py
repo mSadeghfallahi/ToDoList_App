@@ -226,6 +226,7 @@ class TodoCLI:
             for project in projects:
                 print(f"\nID: {project.id}")
                 print(f"Name: {project.name}")
+                print (f"Created at: {project.created_at}")
                 print(f"Description: {project.description if project.description else 'N/A'}")
                 print(f"Tasks: {len(project.tasks)}")
                 print("-" * 60)
