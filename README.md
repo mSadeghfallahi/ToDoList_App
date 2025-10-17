@@ -34,4 +34,3 @@ poetry run todo
 - Task status management (to-do, doing, done)
 - Input validation
 - Cascade deletion
-"""
