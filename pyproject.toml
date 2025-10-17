@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "todo-app"
+version = "0.1.0"
+description = "A CLI-based To-Do list application with projects and tasks"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.scripts]
+todo = "todo_app.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
