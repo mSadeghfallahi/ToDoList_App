@@ -14,11 +14,6 @@ curl -sSL https://install.python-poetry.org | python3 -
 poetry install
 ```
 
-3. Create .env file:
-```bash
-cp .env.example .env
-```
-
 ## Usage
 
 Run the application:
