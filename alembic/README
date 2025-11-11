@@ -11,36 +11,38 @@ Configuration
 
 Usage
 -----
+All Alembic commands should be run from the project root with the config file specified:
+
 1. Create a new migration after model changes:
    ```bash
-   poetry run alembic revision --autogenerate -m "Description of changes"
+   poetry run alembic -c alembic/alembic.ini revision --autogenerate -m "Description of changes"
    ```
 
-2. Review the generated migration file in `versions/` before applying
+2. Review the generated migration file in `alembic/versions/` before applying
 
 3. Apply migrations:
    ```bash
-   poetry run alembic upgrade head
+   poetry run alembic -c alembic/alembic.ini upgrade head
    ```
 
 4. Rollback migrations:
    ```bash
-   poetry run alembic downgrade -1
+   poetry run alembic -c alembic/alembic.ini downgrade -1
    ```
 
 5. Check current database revision:
    ```bash
-   poetry run alembic current
+   poetry run alembic -c alembic/alembic.ini current
    ```
 
 6. View migration history:
    ```bash
-   poetry run alembic history
+   poetry run alembic -c alembic/alembic.ini history
    ```
 
 7. Check for pending changes:
    ```bash
-   poetry run alembic check
+   poetry run alembic -c alembic/alembic.ini check
    ```
 
 Autogenerate
