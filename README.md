@@ -21,7 +21,7 @@ cp .env.example .env
 
 4. Start the PostgreSQL database:
 ```bash
-docker-compose -f docker/docker-compose.yml up -d
+docker-compose up -d
 ```
 
 5. Run database migrations:
@@ -52,10 +52,10 @@ ToDoList_App/
 ├── .env                 # Environment variables (not in git)
 ├── .env.example         # Example environment variables
 ├── .gitignore           # Git ignore rules
+├── docker-compose.yml   # Docker Compose configuration
 ├── pyproject.toml       # Project dependencies and configuration
 ├── poetry.lock          # Locked dependencies
 ├── alembic/             # Database migrations
-├── docker/              # Docker configuration
 ├── docs/                # Documentation
 ├── tests/               # Test files
 └── todo_app/            # Application code
@@ -63,7 +63,7 @@ ToDoList_App/
 
 ## Testing
 
-See [TESTING.md](TESTING.md) for detailed testing instructions.
+See [docs/TESTING.md](docs/TESTING.md) for detailed testing instructions.
 
 ## Database Migrations
 

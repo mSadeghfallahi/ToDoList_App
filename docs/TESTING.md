@@ -14,7 +14,7 @@ This guide explains how to test the database setup and models.
 
 ```bash
 cd /home/sadegh/Documents/nnn/ToDoList_App
-docker-compose -f docker/docker-compose.yml up -d
+docker-compose up -d
 ```
 
 ### 2. Create a `.env` File
@@ -35,7 +35,7 @@ MAX_NUMBER_OF_PROJECTS=10
 Check if the container is running:
 
 ```bash
-docker-compose -f docker/docker-compose.yml ps
+docker-compose ps
 ```
 
 ## Running Tests
@@ -112,12 +112,12 @@ poetry run pytest tests/ --cov=todo_app --cov-report=html
 
 1. Check if Docker container is running:
    ```bash
-   docker-compose -f docker/docker-compose.yml ps
+   docker-compose ps
    ```
 
 2. Check container logs:
    ```bash
-   docker-compose -f docker/docker-compose.yml logs postgres
+   docker-compose logs postgres
    ```
 
 3. Verify `.env` file exists and has correct values
