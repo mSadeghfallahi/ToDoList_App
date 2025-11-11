@@ -7,15 +7,19 @@ from todo_app.config import Config
 from .base import Base
 
 
-# Create SQLAlchemy engine
-# The database URL is constructed from environment variables via Config
-engine = create_engine(
-    Config.DATABASE_URL,
-    echo=False,  # Set to True for SQL query logging
-    pool_pre_ping=True,  # Verify connections before using them
-    pool_size=5,  # Number of connections to maintain
-    max_overflow=10,  # Maximum number of connections beyond pool_size
-)
+# Build engine kwargs conditionally so that tests can use SQLite in-memory
+# without passing invalid pool arguments for that dialect.
+engine_kwargs = {
+    'echo': False,
+    'pool_pre_ping': True,
+}
+
+# If the configured URL is not SQLite, it's safe to set pool sizing options.
+if not Config.DATABASE_URL.startswith('sqlite:'):
+    engine_kwargs.update({'pool_size': 5, 'max_overflow': 10})
+
+# Create SQLAlchemy engine using the computed kwargs
+engine = create_engine(Config.DATABASE_URL, **engine_kwargs)
 
 # Create SessionLocal factory
 SessionLocal = sessionmaker(

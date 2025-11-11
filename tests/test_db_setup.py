@@ -4,6 +4,7 @@ Simple test script to verify database setup and models.
 Run this script to test if everything is working correctly.
 """
 import sys
+import pytest
 from datetime import datetime, timedelta, timezone
 from todo_app.db.session import engine, SessionLocal, init_db
 from todo_app.models import Project, Task, TaskStatus
@@ -15,10 +16,9 @@ def test_database_connection():
     try:
         with engine.connect() as conn:
             print("✓ Database connection successful!")
-            return True
+            assert True
     except Exception as e:
-        print(f"✗ Database connection failed: {e}")
-        return False
+        pytest.fail(f"✗ Database connection failed: {e}")
 
 
 def test_create_tables():
@@ -27,10 +27,9 @@ def test_create_tables():
     try:
         init_db()
         print("✓ Tables created successfully!")
-        return True
+        assert True
     except Exception as e:
-        print(f"✗ Failed to create tables: {e}")
-        return False
+        pytest.fail(f"✗ Failed to create tables: {e}")
 
 
 def test_create_project():
@@ -46,11 +45,11 @@ def test_create_project():
         db.commit()
         db.refresh(project)
         print(f"✓ Project created: {project}")
-        return project
+        assert project.id is not None
+        return
     except Exception as e:
         db.rollback()
-        print(f"✗ Failed to create project: {e}")
-        return None
+        pytest.fail(f"✗ Failed to create project: {e}")
     finally:
         db.close()
 
@@ -71,11 +70,11 @@ def test_create_task(project_id):
         db.commit()
         db.refresh(task)
         print(f"✓ Task created: {task}")
-        return task
+        assert task.id is not None
+        return
     except Exception as e:
         db.rollback()
-        print(f"✗ Failed to create task: {e}")
-        return None
+        pytest.fail(f"✗ Failed to create task: {e}")
     finally:
         db.close()
 
@@ -92,16 +91,16 @@ def test_relationships(project_id):
             print(f"✓ Number of tasks: {len(project.tasks)}")
             for task in project.tasks:
                 print(f"  - Task: {task.name} (Status: {task.status.value})")
-            
+
             # Test reverse relationship
             if project.tasks:
                 task = project.tasks[0]
                 print(f"✓ Task's project: {task.project.name}")
-                return True
-        return False
+                assert task.project is not None
+                return
+        pytest.skip("Project not found for relationships test")
     except Exception as e:
-        print(f"✗ Relationship test failed: {e}")
-        return False
+        pytest.fail(f"✗ Relationship test failed: {e}")
     finally:
         db.close()
 
@@ -114,19 +113,18 @@ def test_query_operations():
         # Query all projects
         projects = db.query(Project).all()
         print(f"✓ Found {len(projects)} project(s)")
-        
+
         # Query all tasks
         tasks = db.query(Task).all()
         print(f"✓ Found {len(tasks)} task(s)")
-        
+
         # Query tasks by status
         todo_tasks = db.query(Task).filter(Task.status == TaskStatus.TODO).all()
         print(f"✓ Found {len(todo_tasks)} TODO task(s)")
-        
-        return True
+
+        assert True
     except Exception as e:
-        print(f"✗ Query operations failed: {e}")
-        return False
+        pytest.fail(f"✗ Query operations failed: {e}")
     finally:
         db.close()
 
