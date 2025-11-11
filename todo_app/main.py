@@ -244,9 +244,11 @@ class TodoCLI:
         else:
             for task in tasks:
                 print(f"\nID: {task.id}")
-                print(f"Title: {task.title}")
-                print(f"Status: {task.status}")
-                print(f"Deadline: {task.deadline.strftime('%Y-%m-%d')}")
+                print(f"Title: {task.name}")
+                # Handle status - it might be an enum or a string
+                status_value = task.status.value if hasattr(task.status, 'value') else task.status
+                print(f"Status: {status_value}")
+                print(f"Deadline: {task.deadline.strftime('%Y-%m-%d') if task.deadline else 'N/A'}")
                 print(f"Description: {task.description if task.description else 'N/A'}")
                 print("-" * 60)
 
