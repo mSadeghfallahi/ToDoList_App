@@ -3,7 +3,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables
-env_path = Path('.') / '.env'
+# Find the project root (where .env file is located)
+project_root = Path(__file__).parent.parent
+env_path = project_root / '.env'
 load_dotenv(dotenv_path=env_path)
 
 class Config:
