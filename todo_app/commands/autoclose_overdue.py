@@ -1,12 +1,10 @@
 """Scheduled command to automatically close overdue tasks.
 
-This module runs a background job every 15 minutes to find all tasks with
+This module provides the job that runs every 15 minutes to find all tasks with
 deadline < now() and status != DONE, and marks them as DONE.
 """
 from __future__ import annotations
 
-import schedule
-import time
 import logging
 from datetime import datetime, timezone
 from typing import Optional
@@ -91,42 +89,13 @@ def schedule_autoclose_job() -> None:
     
     Example:
         from todo_app.commands.autoclose_overdue import schedule_autoclose_job
+        from todo_app.commands.scheduler import run_scheduler
         
-        if __name__ == "__main__":
-            schedule_autoclose_job()
-            while True:
-                schedule.run_pending()
-                time.sleep(1)
+        schedule_autoclose_job()
+        run_scheduler()
     """
-    schedule.every(15).minutes.do(autoclose_overdue_tasks)
-    logger.info("Scheduled autoclose_overdue_tasks to run every 15 minutes.")
-
-
-def run_scheduler() -> None:
-    """Run the scheduler loop indefinitely.
-    
-    This is a blocking function that continuously runs pending scheduled jobs.
-    Call this function in a separate thread or process if you want the scheduler
-    to run alongside other application logic.
-    
-    Example:
-        import threading
-        from todo_app.commands.autoclose_overdue import run_scheduler
-        
-        scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
-        scheduler_thread.start()
-    """
-    schedule_autoclose_job()
-    
-    logger.info("Starting scheduler loop...")
-    try:
-        while True:
-            schedule.run_pending()
-            time.sleep(1)  # Check for pending jobs every second
-    except KeyboardInterrupt:
-        logger.info("Scheduler interrupted.")
-    except Exception as e:
-        logger.error(f"Scheduler error: {e}", exc_info=True)
+    from todo_app.commands.scheduler import schedule_autoclose_job as schedule_job
+    schedule_job(autoclose_overdue_tasks)
 
 
 if __name__ == "__main__":
@@ -136,5 +105,7 @@ if __name__ == "__main__":
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     
-    # Run the scheduler
+    # Schedule and run the autoclose job
+    from todo_app.commands.scheduler import run_scheduler
+    schedule_autoclose_job()
     run_scheduler()
