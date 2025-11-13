@@ -1,8 +1,13 @@
 """Command-line interface for To-Do application."""
 
+import logging
 from todo_app.services.project_manager import ProjectManager
 from todo_app.services.task_manager import TaskManager
-from todo_app.utils.validators import ValidationError
+from todo_app.exceptions import ValidationError
+from todo_app.utils.logging_config import get_logger
+
+# Setup logger for CLI
+logger = get_logger(__name__)
 
 
 class TodoCLI:
@@ -103,10 +108,16 @@ class TodoCLI:
             description = input("Enter project description (optional): ").strip()
             
             description = description if description else None
+            logger.debug(f"Creating project with name: {name}")
             project = self.project_manager.create_project(name, description)
             
+            logger.info(f"Project created successfully: {project.name} (ID: {project.id})")
             print(f"\n✓ Project created successfully! (ID: {project.id})")
         except ValidationError as e:
+            logger.warning(f"Validation error creating project: {e}")
+            print(f"\n❌ Error: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error creating project: {e}", exc_info=True)
             print(f"\n❌ Error: {e}")
     
     def edit_project(self):
@@ -122,9 +133,15 @@ class TodoCLI:
             name = name if name else None
             description = description if description else None
             
+            logger.debug(f"Editing project ID {project_id}")
             project = self.project_manager.edit_project(project_id, name, description)
+            logger.info(f"Project {project_id} updated successfully")
             print(f"\n✓ Project updated successfully!")
         except (ValidationError, ValueError) as e:
+            logger.warning(f"Error editing project: {e}")
+            print(f"\n❌ Error: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error editing project: {e}", exc_info=True)
             print(f"\n❌ Error: {e}")
     
     def delete_project(self):
@@ -135,11 +152,18 @@ class TodoCLI:
             
             confirm = input(f"Are you sure you want to delete project {project_id}? (yes/no): ").strip().lower()
             if confirm == 'yes':
+                logger.debug(f"Deleting project ID {project_id}")
                 self.project_manager.delete_project(project_id)
+                logger.info(f"Project {project_id} deleted successfully")
                 print(f"\n✓ Project deleted successfully!")
             else:
+                logger.debug(f"Project deletion cancelled by user")
                 print("\n❌ Deletion cancelled.")
         except (ValidationError, ValueError) as e:
+            logger.warning(f"Error deleting project: {e}")
+            print(f"\n❌ Error: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error deleting project: {e}", exc_info=True)
             print(f"\n❌ Error: {e}")
     
     def create_task(self):
@@ -157,9 +181,15 @@ class TodoCLI:
             description = description if description else None
             status = status if status else 'to-do'
             
+            logger.debug(f"Creating task in project {project_id}: {title}")
             task = self.task_manager.create_task(project_id, title, deadline, description, status)
+            logger.info(f"Task created successfully in project {project_id}: {task.name} (ID: {task.id})")
             print(f"\n✓ Task created successfully! (ID: {task.id})")
         except (ValidationError, ValueError) as e:
+            logger.warning(f"Error creating task: {e}")
+            print(f"\n❌ Error: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error creating task: {e}", exc_info=True)
             print(f"\n❌ Error: {e}")
     
     def edit_task(self):
@@ -182,9 +212,15 @@ class TodoCLI:
             status = status if status else None
             deadline = deadline if deadline else None
             
+            logger.debug(f"Editing task {task_id} in project {project_id}")
             task = self.task_manager.edit_task(project_id, task_id, title, description, status, deadline)
+            logger.info(f"Task {task_id} updated successfully")
             print(f"\n✓ Task updated successfully!")
         except (ValidationError, ValueError) as e:
+            logger.warning(f"Error editing task: {e}")
+            print(f"\n❌ Error: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error editing task: {e}", exc_info=True)
             print(f"\n❌ Error: {e}")
     
     def delete_task(self):
@@ -198,11 +234,18 @@ class TodoCLI:
             
             confirm = input(f"Are you sure you want to delete task {task_id}? (yes/no): ").strip().lower()
             if confirm == 'yes':
+                logger.debug(f"Deleting task {task_id} from project {project_id}")
                 self.task_manager.delete_task(project_id, task_id)
+                logger.info(f"Task {task_id} deleted successfully")
                 print(f"\n✓ Task deleted successfully!")
             else:
+                logger.debug(f"Task deletion cancelled by user")
                 print("\n❌ Deletion cancelled.")
         except (ValidationError, ValueError) as e:
+            logger.warning(f"Error deleting task: {e}")
+            print(f"\n❌ Error: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error deleting task: {e}", exc_info=True)
             print(f"\n❌ Error: {e}")
     
     def list_tasks(self):
@@ -210,8 +253,10 @@ class TodoCLI:
         try:
             self.list_all_projects()
             project_id = int(input("\nEnter project ID to view tasks: "))
+            logger.debug(f"Listing tasks for project {project_id}")
             self.list_tasks_for_project(project_id)
         except (ValidationError, ValueError) as e:
+            logger.warning(f"Error listing tasks: {e}")
             print(f"\n❌ Error: {e}")
     
     def list_all_projects(self):
