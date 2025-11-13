@@ -11,7 +11,6 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from todo_app.db.session import SessionLocal
 from todo_app.models.task import Task, TaskStatus
 
 
@@ -36,7 +35,14 @@ def autoclose_overdue_tasks(db_session: Optional[Session] = None) -> int:
     Returns:
         Count of tasks that were auto-closed.
     """
-    session = db_session or SessionLocal()
+    # Defer importing SessionLocal to avoid importing DB engine at module import time
+    session = db_session
+    created_session = False
+    if session is None:
+        from todo_app.db.session import SessionLocal
+
+        session = SessionLocal()
+        created_session = True
     
     try:
         now = datetime.now(timezone.utc)
@@ -77,7 +83,7 @@ def autoclose_overdue_tasks(db_session: Optional[Session] = None) -> int:
         return 0
         
     finally:
-        if not db_session:  # Only close if we created the session
+        if created_session and session is not None:
             session.close()
 
 

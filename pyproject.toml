@@ -21,6 +21,7 @@ black = "^23.9.0"
 
 [tool.poetry.scripts]
 todo = "todo_app.main:main"
+todolist = "todo_app.main:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

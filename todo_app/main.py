@@ -1,6 +1,5 @@
 import sys
 import logging
-from todo_app.cli import TodoCLI
 from todo_app.utils.logging_config import setup_logger
 from todo_app.exceptions import (
     TodoAppException,
@@ -25,7 +24,41 @@ EXIT_KEYBOARD_INTERRUPT = 130  # Standard SIGINT exit code
 
 def main():
     """Entry point for the application"""
+    # Support a non-interactive subcommand to run background jobs, e.g.
+    # `todo tasks:autoclose-overdue` or `todolist tasks:autoclose-overdue`.
+    args = sys.argv[1:]
+    if args:
+        # Only support the specific subcommand for now
+        if args[0] == "tasks:autoclose-overdue":
+            try:
+                # Lazy import of the job implementation
+                from todo_app.commands.autoclose_overdue import autoclose_overdue_tasks
+
+                logger.info("Running autoclose_overdue job from CLI")
+                closed = autoclose_overdue_tasks()
+                logger.info(f"Auto-closed {closed} overdue task(s).")
+                print(f"Auto-closed {closed} overdue task(s).")
+                return EXIT_SUCCESS
+            except RepositoryError as e:
+                logger.error(f"Repository error while running autoclose job: {e}", exc_info=True)
+                print(f"Error: {e}")
+                return EXIT_REPOSITORY_ERROR
+            except TodoAppException as e:
+                logger.error(f"Application error while running autoclose job: {e}", exc_info=True)
+                print(f"Error: {e}")
+                return EXIT_SERVICE_ERROR
+            except Exception as e:
+                logger.critical(f"Unexpected error while running autoclose job: {e}", exc_info=True)
+                print(f"Unexpected error: {e}")
+                return EXIT_UNEXPECTED_ERROR
+        # Unknown subcommand: fall through to interactive or return error
+        # We'll print a helpful message and return non-zero
+        print(f"Unknown command: {' '.join(args)}")
+        return EXIT_UNEXPECTED_ERROR
     try:
+        # Import CLI lazily to avoid importing DB-related modules when running non-interactive commands
+        from todo_app.cli import TodoCLI
+
         cli = TodoCLI()
         cli.run()
         logger.info("Application exited successfully")
