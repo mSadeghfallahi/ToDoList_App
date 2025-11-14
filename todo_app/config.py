@@ -3,7 +3,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables
-env_path = Path('.') / '.env'
+# Find the project root (where .env file is located)
+project_root = Path(__file__).parent.parent
+env_path = project_root / '.env'
 load_dotenv(dotenv_path=env_path)
 
 class Config:
@@ -14,4 +16,7 @@ class Config:
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
     DB_NAME = os.getenv("DB_NAME")
-    DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    # Allow overriding the full DATABASE_URL (useful for tests / alternate DBs)
+    DATABASE_URL = os.getenv("DATABASE_URL") or (
+        f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )

@@ -1,0 +1,63 @@
+Alembic Migration Environment
+==============================
+
+This directory contains Alembic migration scripts for the ToDo application.
+
+Configuration
+-------------
+- The database URL is automatically loaded from `todo_app.config.Config` which reads from the `.env` file
+- All models are automatically imported from `todo_app.models` to enable autogenerate
+- The Base metadata is imported from `todo_app.db.base`
+
+Usage
+-----
+All Alembic commands should be run from the project root with the config file specified:
+
+1. Create a new migration after model changes:
+   ```bash
+   poetry run alembic -c alembic/alembic.ini revision --autogenerate -m "Description of changes"
+   ```
+
+2. Review the generated migration file in `alembic/versions/` before applying
+
+3. Apply migrations:
+   ```bash
+   poetry run alembic -c alembic/alembic.ini upgrade head
+   ```
+
+4. Rollback migrations:
+   ```bash
+   poetry run alembic -c alembic/alembic.ini downgrade -1
+   ```
+
+5. Check current database revision:
+   ```bash
+   poetry run alembic -c alembic/alembic.ini current
+   ```
+
+6. View migration history:
+   ```bash
+   poetry run alembic -c alembic/alembic.ini history
+   ```
+
+7. Check for pending changes:
+   ```bash
+   poetry run alembic -c alembic/alembic.ini check
+   ```
+
+Autogenerate
+------------
+Alembic will automatically detect changes to your SQLAlchemy models when you use:
+```bash
+poetry run alembic revision --autogenerate -m "your message"
+```
+
+Always review the generated migration files before applying them, as Alembic may not detect all changes correctly (especially for complex changes like renaming columns).
+
+Database Connection
+-------------------
+The database connection is configured in `env.py` to use:
+- Database URL from `todo_app.config.Config.DATABASE_URL`
+- Environment variables from `.env` file (DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
+
+Make sure your `.env` file is properly configured before running migrations.
