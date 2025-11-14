@@ -6,11 +6,29 @@ authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8.1,<4.0"
 python-dotenv = "^1.0.0"
+sqlalchemy = "^2.0.0"
+psycopg2-binary = "^2.9.0"
+alembic = "^1.12.0"
+typer = "^0.9.0"
+schedule = "^1.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+flake8 = "^6.1.0"
+black = "^23.9.0"
 
 [tool.poetry.scripts]
 todo = "todo_app.main:main"
+todolist = "todo_app.main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short"
 
 [build-system]
 requires = ["poetry-core"]
