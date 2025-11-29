@@ -180,7 +180,6 @@ class TaskManager:
     def list_tasks(self, project_id: int) -> List[Task]:
         """List all tasks in a project"""
         db = self._get_db()
-        
         try:
             # Verify project exists
             project = db.get(Project, project_id)
@@ -195,5 +194,33 @@ class TaskManager:
                 _ = t.id, t.name, t.description, t.status, t.deadline, t.project_id, t.created_at, t.updated_at
                 db.expunge(t)
             return tasks_list
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+    def auto_close_overdue(self) -> int:
+        """Auto-close overdue tasks.
+
+        Returns the number of tasks closed.
+        """
+        db = self._get_db()
+        try:
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            stmt = select(Task).where(Task.deadline < now, Task.status != TaskStatus.DONE)
+            overdue_tasks = db.scalars(stmt).all()
+            if not overdue_tasks:
+                return 0
+            closed_count = 0
+            for task in overdue_tasks:
+                task.status = TaskStatus.DONE
+                task.updated_at = now
+                closed_count += 1
+            db.commit()
+            return closed_count
+        except Exception:
+            db.rollback()
+            raise
         finally:
             db.close()

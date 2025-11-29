@@ -20,3 +20,8 @@ class Config:
     DATABASE_URL = os.getenv("DATABASE_URL") or (
         f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
+    # CLI deprecation configuration
+    # Optional env var to set a hard deprecation date (YYYY-MM-DD) shown to users
+    CLI_DEPRECATION_DATE = os.getenv('CLI_DEPRECATION_DATE', '2026-01-01')
+    # By default, show CLI deprecation warning; set to 'true' to disable warnings
+    DISABLE_CLI_DEPRECATION_WARNING = os.getenv('DISABLE_CLI_DEPRECATION_WARNING', 'false').lower() == 'true'

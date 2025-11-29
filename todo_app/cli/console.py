@@ -5,6 +5,7 @@ from todo_app.services.project_manager import ProjectManager
 from todo_app.services.task_manager import TaskManager
 from todo_app.exceptions import ValidationError
 from todo_app.utils.logging_config import get_logger
+from todo_app.utils.deprecation import show_deprecation_notice
 
 # Setup logger for CLI
 logger = get_logger(__name__)
@@ -16,12 +17,16 @@ class TodoCLI:
     def __init__(self):
         self.project_manager = ProjectManager()
         self.task_manager = TaskManager(self.project_manager)
+        # Show a deprecation header when the CLI is instantiated
+        show_deprecation_notice('To-Do CLI')
     
     def run(self):
         """Main application loop"""
         print("=" * 60)
         print("Welcome to To-Do List Application".center(60))
         print("=" * 60)
+        # Additional user-facing deprecation text (more condensed)
+        print("\n⚠️ Notice: This CLI is deprecated and will be removed in a future release. See docs/migration-guide.md for API alternatives.\n")
         
         while True:
             self.display_main_menu()

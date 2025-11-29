@@ -12,6 +12,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from todo_app.models.task import Task, TaskStatus
+from todo_app.services.task_manager import TaskManager
 
 
 # Configure logging
@@ -35,14 +36,22 @@ def autoclose_overdue_tasks(db_session: Optional[Session] = None) -> int:
     Returns:
         Count of tasks that were auto-closed.
     """
-    # Defer importing SessionLocal to avoid importing DB engine at module import time
-    session = db_session
-    created_session = False
-    if session is None:
+    # Prefer using the Service layer (TaskManager) instead of a direct DB session
+    if db_session is not None:
+        # A DB session is explicitly provided; keep existing behavior
+        session = db_session
+        # Fall back to a direct session only in this specific case
         from todo_app.db.session import SessionLocal
-
-        session = SessionLocal()
-        created_session = True
+        created_session = False
+    else:
+        # Use the service layer to encapsulate DB operations
+        task_manager = TaskManager(project_manager=None)
+        try:
+            closed_count = task_manager.auto_close_overdue()
+            return closed_count
+        except Exception as e:
+            logger.error(f"autoclose_overdue via service failed: {e}", exc_info=True)
+            return 0
     
     try:
         now = datetime.now(timezone.utc)

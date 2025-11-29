@@ -2,6 +2,8 @@
 
 A CLI-based To-Do list application with project/task management, auto-close overdue tasks, structured exceptions, and comprehensive logging.
 
+> ⚠️ DEPRECATION NOTICE: The interactive CLI is deprecated and will be removed on or after the date specified in `Config.CLI_DEPRECATION_DATE` (default: 2026-01-01). We recommend migrating to the HTTP API. See `docs/migration-guide.md` for a step-by-step guide.
+
 ## Quick Setup
 
 **Prerequisites:** Python 3.8+, Poetry, Docker

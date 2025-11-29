@@ -1,6 +1,7 @@
 import sys
 import logging
 from todo_app.utils.logging_config import setup_logger
+from todo_app.utils.deprecation import show_deprecation_notice
 from todo_app.exceptions import (
     TodoAppException,
     ValidationError,
@@ -27,6 +28,8 @@ def main():
     # Support a non-interactive subcommand to run background jobs, e.g.
     # `todo tasks:autoclose-overdue` or `todolist tasks:autoclose-overdue`.
     args = sys.argv[1:]
+    # Show a deprecation notice for CLI usage (interactive and subcommands)
+    show_deprecation_notice('To-Do CLI')
     if args:
         # Only support the specific subcommand for now
         if args[0] == "tasks:autoclose-overdue":
