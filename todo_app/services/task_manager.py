@@ -194,9 +194,18 @@ class TaskManager:
                 _ = t.id, t.name, t.description, t.status, t.deadline, t.project_id, t.created_at, t.updated_at
                 db.expunge(t)
             return tasks_list
-        except Exception:
-            db.rollback()
-            raise
+        finally:
+            db.close()
+    def get_task(self, project_id: int, task_id: int) -> Optional[Task]:
+        """Return a single task belonging to a specified project (detached)."""
+        db = self._get_db()
+        try:
+            task = db.get(Task, task_id)
+            if not task or task.project_id != project_id:
+                return None
+            _ = task.id, task.name, task.description, task.status, task.deadline, task.created_at
+            db.expunge(task)
+            return task
         finally:
             db.close()
     def auto_close_overdue(self) -> int:

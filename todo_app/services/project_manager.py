@@ -141,6 +141,19 @@ class ProjectManager:
     def _get_project_by_id(self, db: Session, project_id: int) -> Optional[Project]:
         """Get project by ID"""
         return db.get(Project, project_id)
+
+    def get_project(self, project_id: int) -> Optional[Project]:
+        """Public method to return a project by id."""
+        db = self._get_db()
+        try:
+            project = db.get(Project, project_id)
+            if project:
+                _ = project.id, project.name, project.description, project.created_at
+                db.expunge(project)
+                return project
+            return None
+        finally:
+            db.close()
     
     def _is_name_exists(self, db: Session, name: str, exclude_id: Optional[int] = None) -> bool:
         """Check if project name already exists"""
