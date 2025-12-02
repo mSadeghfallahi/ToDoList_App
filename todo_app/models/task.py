@@ -55,11 +55,24 @@ class Task(Base):
         """Convert task to dictionary."""
         return {
             'id': self.id,
-            'name': self.name,
+            'title': self.name,
             'description': self.description,
-            'status': self.status.value if isinstance(self.status, TaskStatus) else self.status,
-            'deadline': self.deadline.isoformat() if self.deadline else None,
+            'done': (self.status == TaskStatus.DONE),
+            'due_date': self.deadline.isoformat() if self.deadline else None,
             'project_id': self.project_id,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
+
+    # Compatibility / API adapter properties
+    @property
+    def title(self) -> str:
+        return self.name
+
+    @property
+    def due_date(self):
+        return self.deadline
+
+    @property
+    def done(self) -> bool:
+        return self.status == TaskStatus.DONE

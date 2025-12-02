@@ -4,7 +4,19 @@ This document describes endpoints for LITS (Lists) and Tasks. Lists are equivale
 
 Version prefix: `/api/v1/`
 
+- limit: integer (default 10, max 100) — page size
+- offset: integer (default 0) — page offset
+- q: string — full-text search across name/title/description
+- sort: string (e.g., "created_at", "-created_at", "deadline", "-deadline")
+- status: string (for tasks only) — one of: `to-do`, `in-progress`, `done`, `cancelled`
+- due_before/due_after: ISO 8601 date/datetime strings for filtering by deadline
 Common query parameters for listing endpoints:
+- limit: integer (default 10, max 100) — page size
+- offset: integer (default 0) — page offset
+- q: string — full-text search across `name`/`title`/`description`
+- sort: string (e.g., `created_at`, `-created_at`, `due_date`, `-due_date`)
+- status: string (for tasks only) — one of: `to-do`, `in-progress`, `done`, `cancelled`
+- due_before/due_after: ISO 8601 date/datetime strings for filtering by `due_date`
 - limit: integer (default 10, max 100) — page size
 - offset: integer (default 0) — page offset
 - q: string — full-text search across name/title/description
@@ -64,10 +76,10 @@ Model (TaskRead)
 ```json
 {
   "id": 123,
-  "name": "Buy milk",
+  "title": "Buy milk",
   "description": "Remember to get semi-skimmed",
-  "status": "to-do",
-  "deadline": "2025-12-31T23:59:00Z",
+  "done": false,
+  "due_date": "2025-12-31T23:59:00Z",
   "project_id": 1,
   "created_at": "2025-12-12T04:12:00Z",
   "updated_at": "2025-12-12T05:22:00Z"

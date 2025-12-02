@@ -23,12 +23,16 @@ class TaskDTO:
         description: Optional[str] = None,
         status: str = TaskStatus.TODO.value,
         deadline: Optional[datetime] = None,
+        done: Optional[bool] = False,
+        due_date: Optional[datetime] = None,
     ):
         self.name = name
         self.project_id = project_id
         self.description = description
         self.status = status
         self.deadline = deadline
+        self.done = done
+        self.due_date = due_date
 
 
 class TaskRepository(ABC):
@@ -208,12 +212,17 @@ class SqlAlchemyTaskRepository(TaskRepository, SQLAlchemyRepository[Task]):
 
     def create(self, task_dto: TaskDTO) -> Task:
         """Create and persist a task to the database."""
+        # Map done flag or status string to Task.status enum
+        status_val = task_dto.status
+        if task_dto.done:
+            status_val = TaskStatus.DONE.value
+        deadline = task_dto.due_date if task_dto.due_date else task_dto.deadline
         task = Task(
             name=task_dto.name,
             project_id=task_dto.project_id,
             description=task_dto.description,
-            status=TaskStatus(task_dto.status),
-            deadline=task_dto.deadline,
+            status=TaskStatus(status_val),
+            deadline=deadline,
         )
         return self.add(task)
 

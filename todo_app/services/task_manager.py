@@ -31,8 +31,8 @@ class TaskManager:
         }
         return status_map.get(status_lower, TaskStatus.TODO)
     
-    def create_task(self, project_id: int, title: str, deadline: str,
-                   description: Optional[str] = None, status: str = 'to-do') -> Task:
+    def create_task(self, project_id: int, title: str, due_date: Optional[str] = None,
+                   description: Optional[str] = None, status: Optional[str] = 'to-do', done: Optional[bool] = False) -> Task:
         """Create a new task"""
         db = self._get_db()
         
@@ -52,18 +52,22 @@ class TaskManager:
             if not is_valid:
                 raise ValidationError(error)
             
-            # Validate status
-            is_valid, error = Validator.validate_status(status)
+            # Validate status if provided
+            if status is not None:
+                is_valid, error = Validator.validate_status(status)
+                if not is_valid:
+                    raise ValidationError(error)
+
+            # Validate due_date
+            is_valid, error, deadline_obj = Validator.validate_date(due_date) if due_date else (True, None, None)
             if not is_valid:
                 raise ValidationError(error)
             
-            # Validate deadline
-            is_valid, error, deadline_obj = Validator.validate_date(deadline)
-            if not is_valid:
-                raise ValidationError(error)
-            
-            # Map status string to enum
-            status_enum = self._map_status_to_enum(status)
+            # Map 'done' boolean or status string to enum
+            if done:
+                status_enum = TaskStatus.DONE
+            else:
+                status_enum = self._map_status_to_enum(status) if status is not None else TaskStatus.TODO
             
             # Create task using keyword arguments
             task = Task(
@@ -89,7 +93,7 @@ class TaskManager:
     
     def edit_task(self, project_id: int, task_id: int, 
                  title: Optional[str] = None, description: Optional[str] = None,
-                 status: Optional[str] = None, deadline: Optional[str] = None) -> Task:
+                 status: Optional[str] = None, due_date: Optional[str] = None, done: Optional[bool] = None) -> Task:
         """Edit an existing task"""
         db = self._get_db()
         
@@ -122,16 +126,22 @@ class TaskManager:
                     raise ValidationError(error)
                 task.description = description
             
-            # Validate and update status if provided
-            if status is not None:
+            # Validate and update status/done if provided
+            if done is not None:
+                if done:
+                    task.status = TaskStatus.DONE
+                else:
+                    # If explicitly set to not done, default to TODO unless status provided
+                    task.status = self._map_status_to_enum(status) if status is not None else TaskStatus.TODO
+            elif status is not None:
                 is_valid, error = Validator.validate_status(status)
                 if not is_valid:
                     raise ValidationError(error)
                 task.status = self._map_status_to_enum(status)
             
-            # Validate and update deadline if provided
-            if deadline is not None:
-                is_valid, error, deadline_obj = Validator.validate_date(deadline)
+            # Validate and update due_date if provided
+            if due_date is not None:
+                is_valid, error, deadline_obj = Validator.validate_date(due_date)
                 if not is_valid:
                     raise ValidationError(error)
                 task.deadline = deadline_obj

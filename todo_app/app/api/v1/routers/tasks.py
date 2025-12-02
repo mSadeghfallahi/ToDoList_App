@@ -17,9 +17,9 @@ def get_task_service() -> TaskManager:
 @router.post("/projects/{project_id}/tasks", response_model=schemas.TaskRead, status_code=status.HTTP_201_CREATED)
 def create_task(project_id: int, body: schemas.TaskCreate, service: TaskManager = Depends(get_task_service), response: Response = None):
     try:
-        # TaskManager expects a string deadline; convert if provided
-        deadline = body.deadline.isoformat() if body.deadline else None
-        task = service.create_task(project_id, body.title, deadline, body.description, body.status.value)
+        # TaskManager expects due_date string; convert if provided
+        due_date = body.due_date.strftime('%Y-%m-%d') if body.due_date else None
+        task = service.create_task(project_id, body.title, due_date, body.description, done=body.done)
         response.headers["Location"] = f"/api/v1/projects/{project_id}/tasks/{task.id}"
         return task
     except ValidationError as e:
@@ -44,13 +44,13 @@ def list_tasks(
         tasks = service.list_tasks(project_id)
         # Filters (in-memory). Move to service/db for scale.
         if q:
-            tasks = [t for t in tasks if q.lower() in (t.name.lower() or "") or q.lower() in (t.description.lower() if t.description else "")]
+            tasks = [t for t in tasks if q.lower() in (t.title.lower() or "") or q.lower() in (t.description.lower() if t.description else "")]
         if status:
-            tasks = [t for t in tasks if t.status.value == status.value]
+            tasks = [t for t in tasks if (t.done and status.value == "done") or (not t.done and status.value != "done")]
         if due_before:
-            tasks = [t for t in tasks if t.deadline and t.deadline <= due_before]
+            tasks = [t for t in tasks if t.due_date and t.due_date <= due_before]
         if due_after:
-            tasks = [t for t in tasks if t.deadline and t.deadline >= due_after]
+            tasks = [t for t in tasks if t.due_date and t.due_date >= due_after]
         # Simple sorting
         if sort == "created_at":
             tasks.sort(key=lambda t: t.created_at)
@@ -75,8 +75,8 @@ def get_task(project_id: int, task_id: int, service: TaskManager = Depends(get_t
 @router.patch("/projects/{project_id}/tasks/{task_id}", response_model=schemas.TaskRead)
 def update_task(project_id: int, task_id: int, body: schemas.TaskUpdate, service: TaskManager = Depends(get_task_service)):
     try:
-        deadline = body.deadline.isoformat() if body.deadline else None
-        task = service.edit_task(project_id, task_id, body.title, body.description, body.status.value if body.status else None, deadline)
+        due_date = body.due_date.strftime('%Y-%m-%d') if body.due_date else None
+        task = service.edit_task(project_id, task_id, body.title, body.description, status=None, due_date=due_date, done=body.done)
         return task
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=e.message)

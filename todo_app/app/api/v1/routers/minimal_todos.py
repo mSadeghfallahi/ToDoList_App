@@ -44,8 +44,8 @@ def get_tasks(list_id: int, q: Optional[str] = Query(None), limit: int = 10, off
 
 @router.post("/api/v1/lists/{list_id}/tasks", response_model=schemas.TaskRead, status_code=status.HTTP_201_CREATED)
 def create_task(list_id: int, body: schemas.TaskCreate, response: Response, service: TaskManager = Depends(get_task_service)):
-    deadline = body.deadline.isoformat() if body.deadline else None
-    task = service.create_task(list_id, body.title, deadline, body.description, body.status.value)
+    due_date = body.due_date.strftime('%Y-%m-%d') if body.due_date else None
+    task = service.create_task(list_id, body.title, due_date, body.description, done=body.done)
     response.headers["Location"] = f"/api/v1/lists/{list_id}/tasks/{task.id}"
     return task
 
@@ -60,8 +60,8 @@ def get_task(list_id: int, task_id: int, service: TaskManager = Depends(get_task
 
 @router.patch("/api/v1/lists/{list_id}/tasks/{task_id}", response_model=schemas.TaskRead)
 def patch_task(list_id: int, task_id: int, body: schemas.TaskUpdate, service: TaskManager = Depends(get_task_service)):
-    deadline = body.deadline.isoformat() if body.deadline else None
-    task = service.edit_task(list_id, task_id, body.title, body.description, body.status.value if body.status else None, deadline)
+    due_date = body.due_date.strftime('%Y-%m-%d') if body.due_date else None
+    task = service.edit_task(list_id, task_id, body.title, body.description, status=None, due_date=due_date, done=body.done)
     return task
 
 
